@@ -33,7 +33,42 @@ std::vector < std::vector<int>> local_stiffness_matrix(int size)
 
 // Function to Global stiffness matrix for bar element
 
-std:: 
+std:: vector< std:: vector<int>> Formation_of_global_stiffness_matrix(int size, 
+	std::vector< std::vector< int>> local_stiffness_matrix)
+{
+	// Global matrix definition
+	std::vector< std::vector< int>> global_matrix(size, std::vector<int>(size, 0));
+
+	// extract size of matrix
+	int rows = global_matrix.size();
+	int col = global_matrix[0].size();
+	int  local_stiffness_matrix_size= local_stiffness_matrix.size()-1;
+
+	for (int i=1;i<rows-1;i++)
+	{
+		/* if (i == 0 || i == rows - 1)
+		{
+			global_matrix[i][i] = local_stiffness_matrix[local_stiffness_matrix_size][local_stiffness_matrix_size];
+		}
+		if (i == 0)
+		{
+			global_matrix[i][i + 1] = local_stiffness_matrix[0][1];
+		}
+		if (i == rows-1)
+		{
+			global_matrix[i][i - 1] = local_stiffness_matrix[1][0];
+			
+		}*/
+		//global_matrix[i][i] = local_stiffness_matrix[local_stiffness_matrix_size][local_stiffness_matrix_size] 
+				//+ local_stiffness_matrix[local_stiffness_matrix_size][local_stiffness_matrix_size];
+		//global_matrix[i][i + 1] = local_stiffness_matrix[0][1];
+		//global_matrix[i][i - 1] = local_stiffness_matrix[1][0];
+		
+	}
+
+	return global_matrix;
+
+}
 
 /*int local_stiffness_matrix()
 {
@@ -97,10 +132,18 @@ int main()
 
 	size of globle stiffness matrix = Number of nodes in model *  degrees of freedom of each element */
 
-	int number_of_nodes_in_model = 2;
+	int number_of_nodes_in_model = 40;
 	int Degrees_of_freedom_of_each_element = 1; // For bar element the displacement specifies the state of node. 
 
 	int size_of_global_stiffness_matrix = number_of_nodes_in_model * Degrees_of_freedom_of_each_element;
-	std::vector <std::vector<int>> Global_stiffness_matrix = Formation_of_global_stiffness_matrix(size_of_global_stiffness_matrix, local_stiffness_matrix);
+	std::vector <std::vector<int>> Global_stiffness_matrix = Formation_of_global_stiffness_matrix(size_of_global_stiffness_matrix, new_matrix);
 
+	for (const auto& row : Global_stiffness_matrix)
+	{
+		for( int element: row)
+		{
+			std::cout << element <<" ";
+		}
+		std::cout << std::endl;
+	}
 	};
