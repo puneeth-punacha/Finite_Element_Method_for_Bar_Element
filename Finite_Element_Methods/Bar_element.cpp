@@ -11,23 +11,25 @@
 
 
 // Local stiffness matrix for bar element
-std::vector < std::vector<int>> local_stiffness_matrix(int size)
+std::vector < std::vector<int>> local_stiffness_matrix(int size, int a, int y, int l)
 {
 	std::vector<std::vector<int>> matrix(size, std::vector<int>(size, 0));
 
 	for (int i = 0; i < size; i++)
 	{
-		matrix[i][i] = 1;
+		matrix[i][i] = (a * y / l);
 		if (i != size-1)
 		{
-			matrix[i][i + 1] = -1;
+			matrix[i][i + 1] = -(a * y / l);
+			
 		}
 		
 		if (i != 0)
 		{
-			matrix[i][i - 1] = -1;
+			matrix[i][i - 1] = -(a * y / l);
 		}
 	}
+	
 	return matrix;
 }
 
@@ -44,28 +46,36 @@ std:: vector< std:: vector<int>> Formation_of_global_stiffness_matrix(int size,
 	int col = global_matrix[0].size();
 	int  local_stiffness_matrix_size= local_stiffness_matrix.size()-1;
 
-	for (int i=1;i<rows-1;i++)
+	for (int i=0;i<rows;i++)
 	{
-		/* if (i == 0 || i == rows - 1)
-		{
-			global_matrix[i][i] = local_stiffness_matrix[local_stiffness_matrix_size][local_stiffness_matrix_size];
-		}
+		
 		if (i == 0)
 		{
 			global_matrix[i][i + 1] = local_stiffness_matrix[0][1];
+			continue;
+			
 		}
-		if (i == rows-1)
+		if (i == rows - 1)
 		{
 			global_matrix[i][i - 1] = local_stiffness_matrix[1][0];
-			
-		}*/
-		//global_matrix[i][i] = local_stiffness_matrix[local_stiffness_matrix_size][local_stiffness_matrix_size] 
-				//+ local_stiffness_matrix[local_stiffness_matrix_size][local_stiffness_matrix_size];
-		//global_matrix[i][i + 1] = local_stiffness_matrix[0][1];
-		//global_matrix[i][i - 1] = local_stiffness_matrix[1][0];
+			continue;
+
+
+		}
+		
+		
+				global_matrix[i][i] = local_stiffness_matrix[local_stiffness_matrix_size][local_stiffness_matrix_size]
+					+ local_stiffness_matrix[local_stiffness_matrix_size][local_stiffness_matrix_size];
+				global_matrix[i][i + 1] = local_stiffness_matrix[0][1];
+				global_matrix[i][i - 1] = local_stiffness_matrix[1][0];
+		
 		
 	}
-
+	
+	
+		global_matrix[0][0] = local_stiffness_matrix[local_stiffness_matrix_size][local_stiffness_matrix_size];
+		global_matrix[rows-1][rows-1] = local_stiffness_matrix[local_stiffness_matrix_size][local_stiffness_matrix_size];
+	
 	return global_matrix;
 
 }
@@ -103,15 +113,22 @@ std:: vector< std:: vector<int>> Formation_of_global_stiffness_matrix(int size,
 
 int main()
 {
+	// Material Properties at each node ( At this moment considering homogeneous material properties at all nodes)
 
+	int cross_sectional_area = 10000; //mm^2
+	int length_of_element = 500; //mm
+	int youngs_modulus = 200000; //MPa
+
+
+	
 	//local_stiffness_matrix();
 	
 	// For bar element n is 2 for local stiffness matrix
 	int n; 
-	n = 2;  
+	n = 2;  // Fixed for bar element
 
 	// Local striffness matrix
-	std::vector< std::vector<int>> new_matrix = local_stiffness_matrix(n);
+	std::vector< std::vector<int>> new_matrix = local_stiffness_matrix(n, cross_sectional_area,youngs_modulus, length_of_element);
 	
 	// Print the  Local striffness matrix
 	for (const auto& row: new_matrix) 
@@ -132,7 +149,7 @@ int main()
 
 	size of globle stiffness matrix = Number of nodes in model *  degrees of freedom of each element */
 
-	int number_of_nodes_in_model = 40;
+	int number_of_nodes_in_model = 3;
 	int Degrees_of_freedom_of_each_element = 1; // For bar element the displacement specifies the state of node. 
 
 	int size_of_global_stiffness_matrix = number_of_nodes_in_model * Degrees_of_freedom_of_each_element;
