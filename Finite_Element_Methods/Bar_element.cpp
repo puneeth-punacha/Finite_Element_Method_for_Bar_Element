@@ -8,8 +8,9 @@
 
 #include<iostream>
 #include<vector>
+#include<Eigen/Dense>
 
-
+using namespace Eigen;
 // Local stiffness matrix for bar element
 std::vector < std::vector<int>> local_stiffness_matrix(int size, int a, int y, int l)
 {
@@ -174,7 +175,9 @@ int main()
 		std::cout << Load_vector[i] << " ";
 	}
 
-	//
+	// Calculate node displacement
+
+	MatrixXd A = Global_stiffness_matrix.inverse();
 
 
 };
