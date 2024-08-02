@@ -163,4 +163,18 @@ int main()
 		}
 		std::cout << std::endl;
 	}
-	};
+	
+	//Global Load Vector
+	std::vector<int> Load_vector(number_of_nodes_in_model);
+
+	//Initialized load at node 1
+	Load_vector={ -10000 };
+	for (int i = 0; i < Load_vector.size(); i++)
+	{
+		std::cout << Load_vector[i] << " ";
+	}
+
+	//
+
+
+};
