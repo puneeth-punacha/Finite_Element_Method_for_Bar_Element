@@ -11,10 +11,13 @@
 #include<Eigen/Dense>
 
 using namespace Eigen;
-// Local stiffness matrix for bar element
-std::vector < std::vector<int>> local_stiffness_matrix(int size, int a, int y, int l)
+using namespace std;
+
+
+// Function for Local stiffness matrix for bar element
+std::vector < std::vector<double>> local_stiffness_matrix(int size, int a, int y, int l)
 {
-	std::vector<std::vector<int>> matrix(size, std::vector<int>(size, 0));
+	std::vector<std::vector<double>> matrix(size, std::vector<double>(size, 0));
 
 	for (int i = 0; i < size; i++)
 	{
@@ -36,11 +39,10 @@ std::vector < std::vector<int>> local_stiffness_matrix(int size, int a, int y, i
 
 // Function to Global stiffness matrix for bar element
 
-std:: vector< std:: vector<int>> Formation_of_global_stiffness_matrix(int size, 
-	std::vector< std::vector< int>> local_stiffness_matrix)
+std:: vector< std:: vector<double>> Formation_of_global_stiffness_matrix(int size, std::vector< std::vector< double>> local_stiffness_matrix)
 {
 	// Global matrix definition
-	std::vector< std::vector< int>> global_matrix(size, std::vector<int>(size, 0));
+	std::vector< std::vector< double >> global_matrix(size, std::vector<double>(size, 0));
 
 	// extract size of matrix
 	int rows = global_matrix.size();
@@ -111,6 +113,94 @@ std:: vector< std:: vector<int>> Formation_of_global_stiffness_matrix(int size,
 }
 */
 
+// Funtion to determinant
+
+double determinant(const vector<vector<double>>& matrix) {
+	int n = matrix.size();
+	if (n == 1) {
+		return matrix[0][0];
+	}
+	else if (n == 2) {
+		return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+	}
+	else {
+		double det = 0;
+		int sign = 1;
+		for (int i = 0; i < n; ++i) {
+			vector<vector<double>> submatrix(n - 1, vector<double>(n - 1));
+			for (int j = 1; j < n; ++j) {
+				int subi = 0;
+				for (int k = 0; k < n; ++k) {
+					if (k != i) {
+						submatrix[subi][k - 1] = matrix[j][k];
+						subi++;
+					}
+				}
+			}
+			det += sign * matrix[0][i] * determinant(submatrix);
+			sign = -sign;
+		}
+		return det;
+	}
+}
+
+// Funtion to cofactor
+vector<vector<double>> cofactor(const vector<vector<double>>& matrix) {
+	int n = matrix.size();
+	vector<vector<double>> result(n, vector<double>(n));
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < n; ++j) {
+			vector<vector<double>> submatrix(n - 1, vector<double>(n - 1));
+			int subi = 0;
+			for (int k = 0; k < n; ++k) {
+				if (k != i) {
+					int subj = 0;
+					for (int l = 0; l < n; ++l) {
+						if (l != j) {
+							submatrix[subi][subj] = matrix[k][l];
+							subj++;
+						}
+					}
+					subi++;
+				}
+			}
+			result[i][j] = pow(-1, i + j) * determinant(submatrix);
+		}
+	}
+	return result;
+}
+
+// Funtion to transpose
+vector<vector<double>> transpose(const vector<vector<double>>& matrix) {
+	int n = matrix.size();
+	vector<vector<double>> result(n, vector<double>(n));
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < n; ++j) {
+			result[i][j] = matrix[j][i];
+		}
+	}
+	return result;
+}
+
+// Funtion to inverse matrix
+vector<vector<double>> inverse_matrix(const vector<vector<double>>& matrix) {
+	int n = matrix.size();
+	double det = determinant(matrix);
+	if (det == 0) {
+		// Handle singular matrix case
+		return {};
+	}
+	vector<vector<double>> cofactor_matrix = cofactor(matrix);
+	vector<vector<double>> adjoint = transpose(cofactor_matrix);
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < n; ++j) {
+			adjoint[i][j] /= det;
+		}
+	}
+	return adjoint;
+}
+
+
 
 int main()
 {
@@ -120,16 +210,12 @@ int main()
 	int length_of_element = 500; //mm
 	int youngs_modulus = 200000; //MPa
 
-
-	
-	//local_stiffness_matrix();
-	
 	// For bar element n is 2 for local stiffness matrix
 	int n; 
 	n = 2;  // Fixed for bar element
 
-	// Local striffness matrix
-	std::vector< std::vector<int>> new_matrix = local_stiffness_matrix(n, cross_sectional_area,youngs_modulus, length_of_element);
+	// Local striffness matrix function call
+	std::vector< std::vector<double>> new_matrix = local_stiffness_matrix(n, cross_sectional_area,youngs_modulus, length_of_element);
 	
 	// Print the  Local striffness matrix
 	for (const auto& row: new_matrix) 
@@ -154,7 +240,9 @@ int main()
 	int Degrees_of_freedom_of_each_element = 1; // For bar element the displacement specifies the state of node. 
 
 	int size_of_global_stiffness_matrix = number_of_nodes_in_model * Degrees_of_freedom_of_each_element;
-	std::vector <std::vector<int>> Global_stiffness_matrix = Formation_of_global_stiffness_matrix(size_of_global_stiffness_matrix, new_matrix);
+	
+	// Global_stiffness_matrix function call
+	std::vector< std::vector<double>> Global_stiffness_matrix = Formation_of_global_stiffness_matrix(size_of_global_stiffness_matrix, new_matrix);
 
 	for (const auto& row : Global_stiffness_matrix)
 	{
@@ -177,7 +265,7 @@ int main()
 
 	// Calculate node displacement
 
-	MatrixXd A = Global_stiffness_matrix.inverse();
+	vector<vector<double>> inverted_matrix = inverse_matrix(Global_stiffness_matrix);
 
-
+	return 0;
 };

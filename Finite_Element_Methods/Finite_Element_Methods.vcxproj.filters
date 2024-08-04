@@ -19,4 +19,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Eigen\Eigen\Eigen">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Eigen\Eigen\Dense">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>
